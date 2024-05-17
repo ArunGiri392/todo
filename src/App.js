@@ -1,73 +1,52 @@
-import logo from './logo.svg';
-import './App.css';
-import React, {useState} from 'react';
+import React, { useState, useEffect } from 'react';
 
-function App() {
-  const[newItem, setnewItem] = useState("")
-  const[todos, settodos] = useState([])
+function App () {
+  const [seconds, setSeconds] = useState(0);
+  const [minutes, setMinutes] = useState(0);
+  const [isactive, setIsActive] = useState(false);
+  
+  useEffect (() => {
+    let timer = null;
+    if (isactive) {
+      timer = setInterval(() => {
+        setSeconds((prevseconds) => {
+          if (prevseconds === 59){
+            setMinutes((prevminutes) => prevminutes + 1);
+            return 0;
+          }
+          else{
+            return (prevseconds + 1);
+          }
+        });
+      }, 1000);
+    }
+    else {
+      //useeffect clears the interval
+      clearInterval(timer);
+    }
+    return () => clearInterval(timer);
 
-  function handleSubmit(e){
-    // prevenes reload of the page.
-    e.preventDefault()
+  }, [isactive]);
+    
 
-    settodos((currentTodos) => {
-      return [
-        ...currentTodos,
-        {
-          id: crypto.randomUUID(), title:newItem, completed:false
-        },
-      ]
-    })
 
-    //to clear the input boxes.
-    setnewItem("")
+  const toggle = () => {
+    setIsActive(!isactive)
   }
 
-  function deletehander(id){
-    settodos(currentTodos => {
-      return currentTodos.filter(todo => todo.id != id)
-    })
-
+  const reset = () => {
+    setSeconds(0);
+    setMinutes(0);
+    setIsActive(false);
   }
 
   return (
     <>
-   <form onSubmit={handleSubmit} className="new-item-form">
-    <div className="form-row">
-      <label htmlFor="item">New Item</label>
-      <input 
-      type="text" 
-      id="item"
-      value={newItem}
-      onChange={e => setnewItem(e.target.value)}
-       />
-    </div>
-
-    <button className="btn">Add</button>
-    <h1 className="header">To Do list</h1>
-    <ul className="list">
-
-      {todos.map((todo) => {
-        return <li key={todo.id}>
-        <label>
-          <input type="checkbox" checked={todo.completed}/>
-          {todo.title}
-        </label>
-
-        <button 
-        className="btn btn-dangert"
-        onClick={() => deletehander(todo.id)}
-
-        >
-          Delete</button>
-      </li>
-      })}
-      
-    </ul>
-   </form>
-   </>
-  );
+    <h1>Timer</h1>
+    <h1>{minutes}:{seconds < 10 ? `0${seconds}` : seconds }</h1>
+    <button onClick={toggle}>{isactive ? 'stop' : 'start'}</button>
+    <button onClick={reset}>Reset</button>
+    </>
+  )
 }
-
-export default App;
- 
+export default App
